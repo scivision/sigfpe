@@ -53,7 +53,10 @@ if(NOT HAVE_FEENABLEEXCEPT)
   endif()
 endif()
 
-check_symbol_exists(__SUPPORT_SNAN__ "fenv.h" HAVE_SNAN)
+check_symbol_exists(__SUPPORT_SNAN__ "fenv.h" SUPPORT_SNAN)
+if(SUPPORT_SNAN)
+  check_symbol_exists(SNAN  "fenv.h" HAVE_SNAN)
+endif()
 
 set(libm  $<$<NOT:$<BOOL:${MSVC}>>:m>)
 
@@ -66,6 +69,7 @@ target_link_libraries(test_fpe PRIVATE ${libm})
 target_compile_definitions(test_fpe PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
 $<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
+$<$<BOOL:${HAVE_SNAN}>:HAVE_SNAN>
 )
 
 add_executable(test_fpe_cpp fpeh.cpp)
@@ -105,7 +109,7 @@ SignalNaN_FPE1_c SignalNaN_FPE1_cpp
 set_property(TEST ${fire_tests} PROPERTY
   PASS_REGULAR_EXPRESSION "Floating point exception encountered")
 
-set_property(TEST SignalNaN_FPE0_c SignalNaN_FPE1_c PROPERTY DISABLED $<NOT:$<BOOL:${HAVE_SNAN}>>)
+set_property(TEST SignalNaN_FPE0_c SignalNaN_FPE1_c PROPERTY DISABLED $<NOT:$<BOOL:${SUPPORT_SNAN}>>)
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   file(GENERATE OUTPUT .gitignore CONTENT "*")

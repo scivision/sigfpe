@@ -95,14 +95,14 @@ void set_qnan(double *f)
     *f = NAN;
 }
 
-inline
+static
 void set_snan(double* f)
 {
-#ifndef _MSC_VER
-    *f = 0.0 / 0.0;
-
+#if defined(HAVE_SNAN)
     // https://www.gnu.org/software/libc/manual/html_node/Infinity-and-NaN.html
-    // *f = SNAN;
+    *f = SNAN;
+#elif !defined(_MSC_VER)
+    *f = 0.0 / 0.0;
 #else
     /* From :
       "NaNs, Uninitialized Variables, and C++"
