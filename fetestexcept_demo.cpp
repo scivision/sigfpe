@@ -1,3 +1,5 @@
+// from https://en.cppreference.com/w/cpp/numeric/fenv/fetestexcept
+
 #include <cfenv>
 #include <cmath>
 #include <iostream>

@@ -1,5 +1,7 @@
 # Apple Silicon exception handling
 
+[![ci](https://github.com/scivision/sigfpe/actions/workflows/ci.yml/badge.svg)](https://github.com/scivision/sigfpe/actions/workflows/ci.yml)
+
 [Original idea](https://github.com/ForestClaw/forestclaw/pull/201/files)
 
 This example implements DYI
