@@ -55,7 +55,8 @@ void enable_floating_point_exceptions()
 
 #ifdef HAVE_FEENABLEEXCEPT /* Linux */
  feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT);
-#else /* macOS */
+#else
+// this code was intended for macOS Apple Silicon, but signal() doesn't fire
  fenv_t env;
  if(fegetenv(&env)){
     fprintf(stderr, "fegetenv() failed\n");
@@ -172,6 +173,15 @@ void show_fe_exceptions(void)
     printf("\n");
 }
 
+void check_for_fpe(void)
+{
+    if(fetestexcept(FE_DIVBYZERO))     fpe_signal_handler(FE_DIVBYZERO);
+    if(fetestexcept(FE_INEXACT))       fpe_signal_handler(FE_INEXACT);
+    if(fetestexcept(FE_INVALID))       fpe_signal_handler(FE_INVALID);
+    if(fetestexcept(FE_OVERFLOW))      fpe_signal_handler(FE_OVERFLOW);
+    if(fetestexcept(FE_UNDERFLOW))     fpe_signal_handler(FE_UNDERFLOW);
+}
+
 
 int main(int argc, char** argv)
 {
@@ -190,6 +200,13 @@ int main(int argc, char** argv)
 
     show_fe_exceptions();
     double y = create_exception(fpe_id);
+
+    if (use_eh && fetestexcept(FE_ALL_EXCEPT)){
+        fprintf(stderr, "Should not get here, using alternate check function\n");
+        check_for_fpe();
+        return EXIT_FAILURE;
+    }
+
     show_fe_exceptions();
 
     printf("Result : y = %g\n",y);
