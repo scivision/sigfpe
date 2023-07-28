@@ -1,7 +1,12 @@
 // https://en.cppreference.com/w/c/numeric/fenv
 
-#define _GNU_SOURCE 1
+#define _GNU_SOURCE
 /* before headers, necessary on Linux */
+
+#define __STDC_WANT_IEC_60559_BFP_EXT__
+/* before fenv.h, enables SNAN
+https://en.cppreference.com/w/c/experimental/fpext1
+*/
 
 #pragma STDC FENV_ACCESS ON
 
@@ -91,11 +96,17 @@ void set_qnan(double *f)
 static
 void set_snan(double* f)
 {
+    *f = 0.0 / 0.0;
+
+    // https://www.gnu.org/software/libc/manual/html_node/Infinity-and-NaN.html
+    // *f = SNAN;
+
     /* From :
       "NaNs, Uninitialized Variables, and C++"
       http://codingcastles.blogspot.fr/2008/12/nans-in-c.html
     */
-    *((long long*)f) = 0x7ff0000000000001LL;
+    // *((long long*)f) = 0x7ff0000000000001LL;
+
 }
 
 static

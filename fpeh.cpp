@@ -1,6 +1,6 @@
 // https://en.cppreference.com/w/c/numeric/fenv
 
-#define _GNU_SOURCE 1
+#define _GNU_SOURCE
 /* before headers, necessary on Linux */
 
 #pragma STDC FENV_ACCESS ON

@@ -32,7 +32,10 @@ endif()
 # not all libc have the fenv.h exception functions.
 # the prototype might be in the header, but not in the library.
 # so we need to check if the function is available.
-set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
+set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE -D__STDC_WANT_IEC_60559_BFP_EXT__)
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  set(CMAKE_REQUIRED_FLAGS -fsignaling-nans)
+endif()
 set(CMAKE_REQUIRED_LIBRARIES m)  # -lm required for Linux fe* functions
 check_symbol_exists(feenableexcept "fenv.h" HAVE_FEENABLEEXCEPT)
 
@@ -43,6 +46,8 @@ if(NOT HAVE_FEENABLEEXCEPT)
     message(WARNING "no FP exception handling available on this platform")
   endif()
 endif()
+
+check_symbol_exists(__SUPPORT_SNAN__ "fenv.h" HAVE_SNAN)
 
 add_executable(feenv_demo feenv_demo.c)
 add_test(NAME feeenv COMMAND feenv_demo)
@@ -85,6 +90,8 @@ set(fire_tests Invalid_FPE1 Overflow_FPE1 DivideByZero_FPE1 SignalNaN_FPE1)
 
 set_property(TEST ${fire_tests} PROPERTY
   PASS_REGULAR_EXPRESSION "Floating point exception encountered")
+
+set_property(TEST SignalNaN_FPE0 SignalNaN_FPE1 PROPERTY DISABLED $<NOT:$<BOOL:${HAVE_SNAN}>>)
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   file(GENERATE OUTPUT .gitignore CONTENT "*")
