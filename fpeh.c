@@ -71,7 +71,7 @@ void enable_floating_point_exceptions()
     exit(EXIT_FAILURE);
  }
 #else
-#warning "FPE signal handling not enabled"
+fprintf(stderr, "FPE signal handling not enabled\n");
 return;
 #endif
 
