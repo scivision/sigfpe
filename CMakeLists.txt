@@ -70,31 +70,37 @@ $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
 $<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
 )
 
-add_executable(fetestexcept_demo fetestexcept_demo.cpp)
-target_link_libraries(fetestexcept_demo PRIVATE m)
-add_test(NAME fetestexcept_cpp COMMAND fetestexcept_demo)
+add_executable(fetestexcept_demo_cpp fetestexcept_demo.cpp)
+target_link_libraries(fetestexcept_demo_cpp PRIVATE m)
+add_test(NAME fetestexcept_cpp COMMAND fetestexcept_demo_cpp)
 set_property(TEST fetestexcept_cpp PROPERTY LABELS "Cpp")
 
 foreach(fpe IN ITEMS 1 0)
+  foreach(L IN ITEMS c cpp)
 
-add_test(NAME Invalid_FPE${fpe} COMMAND test_fpe 1 ${fpe})
-add_test(NAME Overflow_FPE${fpe} COMMAND test_fpe 2 ${fpe})
-add_test(NAME DivideByZero_FPE${fpe} COMMAND test_fpe 4 ${fpe})
-add_test(NAME QuietNaN_FPE${fpe} COMMAND test_fpe 5 ${fpe})
-add_test(NAME SignalNaN_FPE${fpe} COMMAND test_fpe 6 ${fpe})
+    add_test(NAME Invalid_FPE${fpe}_${L} COMMAND test_fpe 1 ${fpe})
+    add_test(NAME Overflow_FPE${fpe}_${L} COMMAND test_fpe 2 ${fpe})
+    add_test(NAME DivideByZero_FPE${fpe}_${L} COMMAND test_fpe 4 ${fpe})
+    add_test(NAME QuietNaN_FPE${fpe}_${L} COMMAND test_fpe 5 ${fpe})
+    add_test(NAME SignalNaN_FPE${fpe}_${L} COMMAND test_fpe 6 ${fpe})
 
-# This test may trip FP_INEXACT on some platforms e.g. macOS intel CPU
-# add_test(NAME Underflow_FPE${fpe} COMMAND test_fpe 3 ${fpe})
-
+    # This test may trip FP_INEXACT on some platforms e.g. macOS intel CPU
+    # add_test(NAME Underflow_FPE${fpe}_${L} COMMAND test_fpe 3 ${fpe})
+  endforeach()
 endforeach()
 
 # Overflow didn't fire on NVHPC 23.5
-set(fire_tests Invalid_FPE1 Overflow_FPE1 DivideByZero_FPE1 SignalNaN_FPE1)
+set(fire_tests
+Invalid_FPE1_c Invalid_FPE1_cpp
+Overflow_FPE1_c Overflow_FPE1_cpp
+DivideByZero_FPE1_c DivideByZero_FPE1_cpp
+SignalNaN_FPE1_c SignalNaN_FPE1_cpp
+)
 
 set_property(TEST ${fire_tests} PROPERTY
   PASS_REGULAR_EXPRESSION "Floating point exception encountered")
 
-set_property(TEST SignalNaN_FPE0 SignalNaN_FPE1 PROPERTY DISABLED $<NOT:$<BOOL:${HAVE_SNAN}>>)
+set_property(TEST SignalNaN_FPE0_c SignalNaN_FPE1_c PROPERTY DISABLED $<NOT:$<BOOL:${HAVE_SNAN}>>)
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   file(GENERATE OUTPUT .gitignore CONTENT "*")
