@@ -64,9 +64,9 @@ add_executable(feenv_demo feenv_demo.c)
 add_test(NAME feeenv COMMAND feenv_demo)
 target_link_libraries(feenv_demo PRIVATE ${libm})
 
-add_executable(test_fpe fpeh.c)
-target_link_libraries(test_fpe PRIVATE ${libm})
-target_compile_definitions(test_fpe PRIVATE
+add_executable(test_fpe_c fpeh.c)
+target_link_libraries(test_fpe_c PRIVATE ${libm})
+target_compile_definitions(test_fpe_c PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
 $<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
 $<$<BOOL:${HAVE_SNAN}>:HAVE_SNAN>
@@ -87,11 +87,16 @@ set_property(TEST fetestexcept_cpp PROPERTY LABELS "Cpp")
 foreach(fpe IN ITEMS 1 0)
   foreach(L IN ITEMS c cpp)
 
-    add_test(NAME Invalid_FPE${fpe}_${L} COMMAND test_fpe 1 ${fpe})
-    add_test(NAME Overflow_FPE${fpe}_${L} COMMAND test_fpe 2 ${fpe})
-    add_test(NAME DivideByZero_FPE${fpe}_${L} COMMAND test_fpe 4 ${fpe})
-    add_test(NAME QuietNaN_FPE${fpe}_${L} COMMAND test_fpe 5 ${fpe})
-    add_test(NAME SignalNaN_FPE${fpe}_${L} COMMAND test_fpe 6 ${fpe})
+    add_test(NAME Invalid_FPE${fpe}_${L}
+      COMMAND test_fpe_${L} 1 ${fpe})
+    add_test(NAME Overflow_FPE${fpe}_${L}
+      COMMAND test_fpe_${L} 2 ${fpe})
+    add_test(NAME DivideByZero_FPE${fpe}_${L}
+      COMMAND test_fpe_${L} 4 ${fpe})
+    add_test(NAME QuietNaN_FPE${fpe}_${L}
+      COMMAND test_fpe_${L} 5 ${fpe})
+    add_test(NAME SignalNaN_FPE${fpe}_${L}
+      COMMAND test_fpe_${L} 6 ${fpe})
 
     # This test may trip FP_INEXACT on some platforms e.g. macOS intel CPU
     # add_test(NAME Underflow_FPE${fpe}_${L} COMMAND test_fpe 3 ${fpe})
@@ -109,7 +114,10 @@ SignalNaN_FPE1_c SignalNaN_FPE1_cpp
 set_property(TEST ${fire_tests} PROPERTY
   PASS_REGULAR_EXPRESSION "Floating point exception encountered")
 
-set_property(TEST SignalNaN_FPE0_c SignalNaN_FPE1_c PROPERTY DISABLED $<NOT:$<BOOL:${SUPPORT_SNAN}>>)
+set_property(TEST
+SignalNaN_FPE0_c SignalNaN_FPE1_c
+SignalNaN_FPE0_cpp SignalNaN_FPE1_cpp
+  PROPERTY DISABLED $<NOT:$<BOOL:${SUPPORT_SNAN}>>)
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   file(GENERATE OUTPUT .gitignore CONTENT "*")

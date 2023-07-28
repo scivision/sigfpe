@@ -100,7 +100,6 @@ void print_hexval(double x)
     printf("x = %16f (%" PRIx64 ")\n", x, xn);
 }
 
-
 static
 double create_exception(int choice)
 {
@@ -170,6 +169,18 @@ void show_fe_exceptions(void)
     std::cout << "\n";
 }
 
+void check_for_fpe(void)
+{
+    // this method is for non-Linux systems for which the typical FPE trap
+    // signal() doesn't fire because the OS/CPU/microcode works differently than Linux.
+    // Instead of signal(), the user code would call this function as desired to check
+    // if an FPE occurred.
+    if(std::fetestexcept(FE_DIVBYZERO))     fpe_signal_handler(FE_DIVBYZERO);
+    if(std::fetestexcept(FE_INEXACT))       fpe_signal_handler(FE_INEXACT);
+    if(std::fetestexcept(FE_INVALID))       fpe_signal_handler(FE_INVALID);
+    if(std::fetestexcept(FE_OVERFLOW))      fpe_signal_handler(FE_OVERFLOW);
+    if(std::fetestexcept(FE_UNDERFLOW))     fpe_signal_handler(FE_UNDERFLOW);
+}
 
 int main(int argc, char** argv)
 {
@@ -188,6 +199,13 @@ int main(int argc, char** argv)
 
     show_fe_exceptions();
     double y = create_exception(fpe_id);
+
+    if (use_eh && std::fetestexcept(FE_ALL_EXCEPT)){
+        std::cerr << "Should not get here, using alternate check function\n";
+        check_for_fpe();
+        return EXIT_FAILURE;
+    }
+
     show_fe_exceptions();
 
     std::cout << "Result : y = " << y << "\n";
