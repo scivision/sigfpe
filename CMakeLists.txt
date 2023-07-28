@@ -68,20 +68,17 @@ foreach(fpe IN ITEMS 1 0)
 
 add_test(NAME Invalid_FPE${fpe} COMMAND test_fpe 1 ${fpe})
 add_test(NAME Overflow_FPE${fpe} COMMAND test_fpe 2 ${fpe})
-add_test(NAME Underflow_FPE${fpe} COMMAND test_fpe 3 ${fpe})
 add_test(NAME DivideByZero_FPE${fpe} COMMAND test_fpe 4 ${fpe})
 add_test(NAME QuietNaN_FPE${fpe} COMMAND test_fpe 5 ${fpe})
 add_test(NAME SignalNaN_FPE${fpe} COMMAND test_fpe 6 ${fpe})
+
+# This test may trip FP_INEXACT on some platforms e.g. macOS intel CPU
+# add_test(NAME Underflow_FPE${fpe} COMMAND test_fpe 3 ${fpe})
 
 endforeach()
 
 # Overflow didn't fire on NVHPC 23.5
 set(fire_tests Invalid_FPE1 Overflow_FPE1 DivideByZero_FPE1 SignalNaN_FPE1)
-
-# Underflow may not fire on all platforms
-if(NOT CMAKE_C_COMPILER_ID MATCHES "(GNU|NVHPC)")
-  list(APPEND fire_tests Underflow_FPE1)
-endif()
 
 set_property(TEST ${fire_tests} PROPERTY
   PASS_REGULAR_EXPRESSION "Floating point exception encountered")
