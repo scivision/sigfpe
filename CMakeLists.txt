@@ -24,7 +24,10 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")
   # error: '#pragma STDC FENV_ACCESS ON' is illegal when precise is disabled
   # https://www.intel.com/content/www/us/en/docs/cpp-compiler/developer-guide-reference/2021-10/fp-model-fp.html
   add_compile_options(-fp-model=precise)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "NVHPC")
+  add_compile_options(--diag_suppress unrecognized_stdc_pragma)
 endif()
+
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   add_compile_options($<$<COMPILE_LANGUAGE:C>:-fsignaling-nans>)
 endif()
