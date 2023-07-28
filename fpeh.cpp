@@ -82,20 +82,13 @@ return;
 static
 void set_qnan(double *f)
 {
-    /*
-     The quiet nan from math.h
-    */
-    *f = NAN;
+    *f = std::numeric_limits<double>::quiet_NaN();
 }
 
 static
 void set_snan(double* f)
 {
-    /* From :
-      "NaNs, Uninitialized Variables, and C++"
-      http://codingcastles.blogspot.fr/2008/12/nans-in-c.html
-    */
-    *((long long*)f) = 0x7ff0000000000001LL;
+    *f = std::numeric_limits<double>::signaling_NaN();
 }
 
 static
