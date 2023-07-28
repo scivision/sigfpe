@@ -83,7 +83,6 @@ jobs:
 
   mac:
     runs-on: macos-latest
-    needs: linux-clang
     timeout-minutes: 10
 
     strategy:
