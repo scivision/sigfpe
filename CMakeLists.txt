@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 project(fpeExamples
-LANGUAGES C)
+LANGUAGES C CXX)
 
 enable_testing()
 
@@ -9,6 +9,7 @@ include(CheckSymbolExists)
 include(CheckSourceCompiles)
 
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 11)
 
 if(CMAKE_C_COMPILER_ID MATCHES "(GNU|Clang)")
   add_compile_options(-Wall
@@ -26,7 +27,6 @@ endif()
 # so we need to check if the function is available.
 set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
 set(CMAKE_REQUIRED_LIBRARIES m)  # -lm required for Linux fe* functions
-check_symbol_exists(fetestexcept "fenv.h" HAVE_FETESTEXCEPT)
 check_symbol_exists(feenableexcept "fenv.h" HAVE_FEENABLEEXCEPT)
 
 if(NOT HAVE_FEENABLEEXCEPT)
@@ -45,8 +45,18 @@ add_executable(test_fpe fpeh.c)
 target_link_libraries(test_fpe PRIVATE m)
 target_compile_definitions(test_fpe PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
-$<$<BOOL:${HAVE_FETESTEXCEPT}>:HAVE_FETESTEXCEPT>
 )
+
+add_executable(test_fpe_cpp fpeh.cpp)
+target_link_libraries(test_fpe_cpp PRIVATE m)
+target_compile_definitions(test_fpe_cpp PRIVATE
+$<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
+)
+
+add_executable(fetestexcept_demo fetestexcept_demo.cpp)
+target_link_libraries(fetestexcept_demo PRIVATE m)
+add_test(NAME fetestexcept_cpp COMMAND fetestexcept_demo)
+set_property(TEST fetestexcept_cpp PROPERTY LABELS "Cpp")
 
 foreach(fpe IN ITEMS 1 0)
 
