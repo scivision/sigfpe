@@ -1,0 +1,111 @@
+name: ci
+
+env:
+  HOMEBREW_NO_INSTALL_CLEANUP: 1
+  CTEST_NO_TESTS_ACTION: error
+
+on:
+  push:
+    paths:
+      - "**.c"
+      - "**.cpp"
+      - "**.f90"
+      - "**/CMakeLists.txt"
+      - "**.cmake"
+      - ".github/workflows/ci.yml"
+
+
+jobs:
+
+  linux-gcc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        gcc-version: [9, 10, 11, 12]
+
+    env:
+      CC: gcc-${{ matrix.gcc-version }}
+      CXX: g++-${{ matrix.gcc-version }}
+      FC: gfortran-${{ matrix.gcc-version }}
+
+    steps:
+
+    - name: install Ninja
+      run: |
+        sudo apt update
+        sudo apt install --no-install-recommends ninja-build
+
+    - uses: actions/checkout@v3
+
+    - name: config
+      run: cmake --preset multi
+
+    - name: Debug workflow
+      run: cmake --workflow --preset debug
+
+    - name: Release workflow
+      run: cmake --workflow --preset release
+
+
+  linux-clang:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        clang-version: [12, 13, 14]
+
+    env:
+      CC: clang-${{ matrix.clang-version }}
+      CXX: clang++-${{ matrix.clang-version }}
+      FC: gfortran
+
+    steps:
+
+    - name: install Ninja
+      run: |
+        sudo apt update
+        sudo apt install --no-install-recommends ninja-build
+
+    - uses: actions/checkout@v3
+
+    - name: config
+      run: cmake --preset multi
+
+    - name: Debug workflow
+      run: cmake --workflow --preset debug
+
+    - name: Release workflow
+      run: cmake --workflow --preset release
+
+
+  mac:
+    runs-on: macos-latest
+    needs: linux-clang
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        compiler: [ {cpp: g++-12, c: gcc-12}, {cpp: clang++, c: clang} ]
+
+    env:
+      CC: ${{ matrix.compiler.c }}
+      CXX: ${{ matrix.compiler.cpp }}
+      FC: gfortran-12
+
+    steps:
+
+    - run: brew install ninja
+
+    - uses: actions/checkout@v3
+
+    - name: config
+      run: cmake --preset multi
+
+    - name: Debug workflow
+      run: cmake --workflow --preset debug
+
+    - name: Release workflow
+      run: cmake --workflow --preset release
