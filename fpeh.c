@@ -175,6 +175,11 @@ void show_fe_exceptions(void)
 
 void check_for_fpe(void)
 {
+    // this method is for systems like macOS Apple Silicon for which the typical FPE trap
+    // signal() method doesn't fire because the OS/CPU/microcode works differently than
+    // Linux arm64/x86_64 and macOS x86_64.
+    // Instead of signal(), the user code would call this function as desired to check
+    // if an FPE occurred.
     if(fetestexcept(FE_DIVBYZERO))     fpe_signal_handler(FE_DIVBYZERO);
     if(fetestexcept(FE_INEXACT))       fpe_signal_handler(FE_INEXACT);
     if(fetestexcept(FE_INVALID))       fpe_signal_handler(FE_INVALID);
