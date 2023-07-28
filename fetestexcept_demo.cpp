@@ -5,7 +5,9 @@
 #include <iostream>
 #include <cstdlib>
 
-// #pragma STDC FENV_ACCESS ON
+#ifdef HAVE_PRAGMA_STDC_FENV
+#pragma STDC FENV_ACCESS ON
+#endif
 
 volatile double zero = 0.0; // volatile not needed where FENV_ACCESS is supported
 volatile double one = 1.0;  // volatile not needed where FENV_ACCESS is supported

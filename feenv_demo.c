@@ -5,7 +5,9 @@
 #include <math.h>
 #include <fenv.h>
 
+#ifdef HAVE_PRAGMA_STDC_FENV
 #pragma STDC FENV_ACCESS ON
+#endif
 
 void show_fe_exceptions(void)
 {

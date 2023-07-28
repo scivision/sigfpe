@@ -10,7 +10,9 @@
 https://en.cppreference.com/w/c/experimental/fpext1
 */
 
+#ifdef HAVE_PRAGMA_STDC_FENV
 #pragma STDC FENV_ACCESS ON
+#endif
 
 #include <signal.h>      // for signal()
 #include <fenv.h>       // for fegetenv(), fesetenv()

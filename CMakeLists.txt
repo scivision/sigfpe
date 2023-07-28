@@ -58,9 +58,15 @@ if(SUPPORT_SNAN)
   check_symbol_exists(SNAN  "fenv.h" HAVE_SNAN)
 endif()
 
+check_source_compiles(C "#pragma STDC FENV_ACCESS ON
+int main(void) { return 0; }" HAVE_PRAGMA_STDC_FENV)
+
 set(libm  $<$<NOT:$<BOOL:${MSVC}>>:m>)
 
 add_executable(feenv_demo feenv_demo.c)
+target_compile_definitions(feenv_demo PRIVATE
+$<$<BOOL:${HAVE_PRAGMA_STDC_FENV}>:HAVE_PRAGMA_STDC_FENV>
+)
 add_test(NAME feeenv COMMAND feenv_demo)
 target_link_libraries(feenv_demo PRIVATE ${libm})
 
@@ -70,6 +76,7 @@ target_compile_definitions(test_fpe_c PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
 $<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
 $<$<BOOL:${HAVE_SNAN}>:HAVE_SNAN>
+$<$<BOOL:${HAVE_PRAGMA_STDC_FENV}>:HAVE_PRAGMA_STDC_FENV>
 )
 
 add_executable(test_fpe_cpp fpeh.cpp)
@@ -77,10 +84,14 @@ target_link_libraries(test_fpe_cpp PRIVATE ${libm})
 target_compile_definitions(test_fpe_cpp PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
 $<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
+$<$<BOOL:${HAVE_PRAGMA_STDC_FENV}>:HAVE_PRAGMA_STDC_FENV>
 )
 
 add_executable(fetestexcept_demo_cpp fetestexcept_demo.cpp)
 target_link_libraries(fetestexcept_demo_cpp PRIVATE ${libm})
+target_compile_definitions(fetestexcept_demo_cpp PRIVATE
+$<$<BOOL:${HAVE_PRAGMA_STDC_FENV}>:HAVE_PRAGMA_STDC_FENV>
+)
 add_test(NAME fetestexcept_cpp COMMAND fetestexcept_demo_cpp)
 set_property(TEST fetestexcept_cpp PROPERTY LABELS "Cpp")
 

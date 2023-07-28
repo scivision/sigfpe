@@ -5,7 +5,9 @@
 #endif
 /* before headers, necessary on Linux */
 
+#ifdef HAVE_PRAGMA_STDC_FENV
 #pragma STDC FENV_ACCESS ON
+#endif
 
 #include <csignal>      // for signal()
 #include <cfenv>       // for fegetenv(), fesetenv()
