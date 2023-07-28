@@ -1,6 +1,8 @@
 // https://en.cppreference.com/w/c/numeric/fenv
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 /* before headers, necessary on Linux */
 
 #define __STDC_WANT_IEC_60559_BFP_EXT__
