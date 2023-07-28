@@ -61,7 +61,9 @@ int main(void)
     /* Perform some computation with new rounding method. */
     feclearexcept(FE_ALL_EXCEPT);
     fesetround(FE_DOWNWARD);
+#ifndef _MSC_VER
     printf("1.0/0.0 = %f\n", 1.0/0.0);
+#endif
     printf("+11.5 -> %+4.1f\n", rint(+11.5));
     printf("+12.5 -> %+4.1f\n", rint(+12.5));
     show_fe_environment();

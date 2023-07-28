@@ -39,7 +39,10 @@ set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE -D__STDC_WANT_IEC_60559_BFP_EXT__)
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_REQUIRED_FLAGS -fsignaling-nans)
 endif()
-set(CMAKE_REQUIRED_LIBRARIES m)  # -lm required for Linux fe* functions
+if(NOT MSVC)
+  set(CMAKE_REQUIRED_LIBRARIES m)  # -lm required for Linux fe* functions
+endif()
+
 check_symbol_exists(feenableexcept "fenv.h" HAVE_FEENABLEEXCEPT)
 
 if(NOT HAVE_FEENABLEEXCEPT)
@@ -52,26 +55,28 @@ endif()
 
 check_symbol_exists(__SUPPORT_SNAN__ "fenv.h" HAVE_SNAN)
 
+set(libm  $<$<NOT:$<BOOL:${MSVC}>>:m>)
+
 add_executable(feenv_demo feenv_demo.c)
 add_test(NAME feeenv COMMAND feenv_demo)
-target_link_libraries(feenv_demo PRIVATE m)
+target_link_libraries(feenv_demo PRIVATE ${libm})
 
 add_executable(test_fpe fpeh.c)
-target_link_libraries(test_fpe PRIVATE m)
+target_link_libraries(test_fpe PRIVATE ${libm})
 target_compile_definitions(test_fpe PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
 $<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
 )
 
 add_executable(test_fpe_cpp fpeh.cpp)
-target_link_libraries(test_fpe_cpp PRIVATE m)
+target_link_libraries(test_fpe_cpp PRIVATE ${libm})
 target_compile_definitions(test_fpe_cpp PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
 $<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
 )
 
 add_executable(fetestexcept_demo_cpp fetestexcept_demo.cpp)
-target_link_libraries(fetestexcept_demo_cpp PRIVATE m)
+target_link_libraries(fetestexcept_demo_cpp PRIVATE ${libm})
 add_test(NAME fetestexcept_cpp COMMAND fetestexcept_demo_cpp)
 set_property(TEST fetestexcept_cpp PROPERTY LABELS "Cpp")
 
