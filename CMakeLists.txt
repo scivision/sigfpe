@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 if(CMAKE_C_COMPILER_ID MATCHES "(GNU|Clang)")
   add_compile_options(-Wall
-  -Werror=implicit-function-declaration
+  $<$<COMPILE_LANGUAGE:C>:-Werror=implicit-function-declaration>
   -Wno-unknown-pragmas
   )
 elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")

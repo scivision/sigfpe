@@ -8,6 +8,7 @@
 #include <csignal>      // for signal()
 #include <cfenv>       // for fegetenv(), fesetenv()
 #include <limits>
+#include <cmath>
 
 #include <iostream>
 #include <cstdlib>
