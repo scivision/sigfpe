@@ -8,6 +8,10 @@ enable_testing()
 include(CheckSymbolExists)
 include(CheckSourceCompiles)
 
+message(STATUS "CMake ${CMAKE_VERSION}
+${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}
+ CPU arch: ${CMAKE_SYSTEM_PROCESSOR}")
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 11)
 
@@ -45,12 +49,14 @@ add_executable(test_fpe fpeh.c)
 target_link_libraries(test_fpe PRIVATE m)
 target_compile_definitions(test_fpe PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
+$<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
 )
 
 add_executable(test_fpe_cpp fpeh.cpp)
 target_link_libraries(test_fpe_cpp PRIVATE m)
 target_compile_definitions(test_fpe_cpp PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
+$<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
 )
 
 add_executable(fetestexcept_demo fetestexcept_demo.cpp)

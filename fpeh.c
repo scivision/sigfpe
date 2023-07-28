@@ -55,7 +55,7 @@ void enable_floating_point_exceptions()
 
 #ifdef HAVE_FEENABLEEXCEPT /* Linux */
  feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT);
-#else
+#elif defined(HAVE_FPCR)
 // this code was intended for macOS Apple Silicon, but signal() doesn't fire
  fenv_t env;
  if(fegetenv(&env)){
@@ -70,6 +70,9 @@ void enable_floating_point_exceptions()
     fprintf(stderr, "fesetenv() failed\n");
     exit(EXIT_FAILURE);
  }
+#else
+#warning "FPE signal handling not enabled"
+return;
 #endif
 
  signal(SIGFPE, fpe_signal_handler);

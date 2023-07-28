@@ -54,7 +54,7 @@ void enable_floating_point_exceptions()
 
 #ifdef HAVE_FEENABLEEXCEPT /* Linux */
  feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT);
-#else /* macOS */
+#elif defined(HAVE_FPCR)
  fenv_t env;
  if(std::fegetenv(&env)){
     std::cerr << "fegetenv() failed\n";
@@ -68,6 +68,9 @@ void enable_floating_point_exceptions()
     std::cerr << "fesetenv() failed\n";
     exit(EXIT_FAILURE);
  }
+#else
+#warning "FPE signal handling not enabled"
+return;
 #endif
 
  std::signal(SIGFPE, fpe_signal_handler);
