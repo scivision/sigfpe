@@ -25,6 +25,9 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")
   # https://www.intel.com/content/www/us/en/docs/cpp-compiler/developer-guide-reference/2021-10/fp-model-fp.html
   add_compile_options(-fp-model=precise)
 endif()
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-fsignaling-nans>)
+endif()
 
 # not all libc have the fenv.h exception functions.
 # the prototype might be in the header, but not in the library.
