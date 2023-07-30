@@ -117,6 +117,21 @@ set div by zero                         7F800000
 Status: divzero, inexact, invalid, overflow, underflow  T T T F F
 ```
 
+Intel oneAPI: Windows x86_64
+
+```
+Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2023.1.0 Build 20230320
+...
+set quiet NaN                         7FC00000
+Status: divzero, inexact, invalid, overflow, underflow  F F F F F
+set signaling NaN                         7FE00000
+Status: divzero, inexact, invalid, overflow, underflow  F F T F F
+set overflow                         7F7FFFFF
+Status: divzero, inexact, invalid, overflow, underflow  F T T F F
+set div by zero                         7F800000
+Status: divzero, inexact, invalid, overflow, underflow  T T T F F
+```
+
 Nvidia HPC SDK: Linux x86_64
 
 ```
