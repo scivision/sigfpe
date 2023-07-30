@@ -11,7 +11,7 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")
   # https://www.intel.com/content/www/us/en/docs/cpp-compiler/developer-guide-reference/2021-10/fp-model-fp.html
   add_compile_options($<IF:$<BOOL:${WIN32}>,/fp:precise,-fp-model=precise>)
 elseif(CMAKE_C_COMPILER_ID STREQUAL "NVHPC")
-  add_compile_options(--diag_suppress unrecognized_stdc_pragma)
+  add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:--diag_suppress=unrecognized_stdc_pragma>")
 endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
@@ -30,7 +30,7 @@ endif()
 # so we need to check if the function is available.
 set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE -D__STDC_WANT_IEC_60559_BFP_EXT__)
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  set(CMAKE_REQUIRED_FLAGS -fsignaling-nans)
+  set(CMAKE_REQUIRED_FLAGS "-fsignaling-nans")
 endif()
 if(NOT MSVC)
   set(CMAKE_REQUIRED_LIBRARIES m)  # -lm required for Linux fe* functions
@@ -49,6 +49,10 @@ endif()
 check_symbol_exists(__SUPPORT_SNAN__ "fenv.h" SUPPORT_SNAN)
 if(SUPPORT_SNAN)
   check_symbol_exists(SNAN  "fenv.h" HAVE_SNAN)
+endif()
+
+if(NOT MSVC)
+  set(CMAKE_REQUIRED_FLAGS "-Werror -Wall")
 endif()
 
 check_source_compiles(C "#pragma STDC FENV_ACCESS ON
