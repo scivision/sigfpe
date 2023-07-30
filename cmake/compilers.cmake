@@ -15,7 +15,7 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "NVHPC")
 endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  add_compile_options($<$<COMPILE_LANGUAGE:C>:-fsignaling-nans>)
+  add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:-fsignaling-nans>)
 endif()
 
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
