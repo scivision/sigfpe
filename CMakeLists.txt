@@ -5,63 +5,19 @@ LANGUAGES C CXX)
 
 enable_testing()
 
-include(CheckSymbolExists)
-include(CheckSourceCompiles)
+option(fortran "build Fortran examples")
 
-message(STATUS "CMake ${CMAKE_VERSION}
-${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}
+if(fortran)
+  enable_language(Fortran)
+endif()
+
+message(STATUS "CMake ${CMAKE_VERSION}   ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}
  CPU arch: ${CMAKE_SYSTEM_PROCESSOR}")
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 11)
 
-if(CMAKE_C_COMPILER_ID MATCHES "(GNU|Clang)")
-  add_compile_options(-Wall
-  $<$<COMPILE_LANGUAGE:C>:-Werror=implicit-function-declaration>
-  -Wno-unknown-pragmas
-  )
-elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")
-  # error: '#pragma STDC FENV_ACCESS ON' is illegal when precise is disabled
-  # https://www.intel.com/content/www/us/en/docs/cpp-compiler/developer-guide-reference/2021-10/fp-model-fp.html
-  add_compile_options($<IF:$<BOOL:${WIN32}>,/fp:precise,-fp-model=precise>)
-elseif(CMAKE_C_COMPILER_ID STREQUAL "NVHPC")
-  add_compile_options(--diag_suppress unrecognized_stdc_pragma)
-endif()
-
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  add_compile_options($<$<COMPILE_LANGUAGE:C>:-fsignaling-nans>)
-endif()
-
-# not all libc have the fenv.h exception functions.
-# the prototype might be in the header, but not in the library.
-# so we need to check if the function is available.
-set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE -D__STDC_WANT_IEC_60559_BFP_EXT__)
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  set(CMAKE_REQUIRED_FLAGS -fsignaling-nans)
-endif()
-if(NOT MSVC)
-  set(CMAKE_REQUIRED_LIBRARIES m)  # -lm required for Linux fe* functions
-endif()
-
-check_symbol_exists(feenableexcept "fenv.h" HAVE_FEENABLEEXCEPT)
-
-if(NOT HAVE_FEENABLEEXCEPT)
-  check_source_compiles(C "#include <fenv.h>
-  int main(void) { fenv_t env; env.__fpcr; return 0; }" HAVE_FPCR)
-  if(NOT HAVE_FPCR)
-    message(WARNING "no FP exception handling available on this platform")
-  endif()
-endif()
-
-check_symbol_exists(__SUPPORT_SNAN__ "fenv.h" SUPPORT_SNAN)
-if(SUPPORT_SNAN)
-  check_symbol_exists(SNAN  "fenv.h" HAVE_SNAN)
-endif()
-
-check_source_compiles(C "#pragma STDC FENV_ACCESS ON
-int main(void) { return 0; }" HAVE_PRAGMA_STDC_FENV)
-
-set(libm  $<$<NOT:$<BOOL:${MSVC}>>:m>)
+include(cmake/compilers.cmake)
 
 add_executable(feenv_demo feenv_demo.c)
 target_compile_definitions(feenv_demo PRIVATE
@@ -128,7 +84,13 @@ set_property(TEST ${fire_tests} PROPERTY
 set_property(TEST
 SignalNaN_FPE0_c SignalNaN_FPE1_c
 SignalNaN_FPE0_cpp SignalNaN_FPE1_cpp
-  PROPERTY DISABLED $<NOT:$<BOOL:${SUPPORT_SNAN}>>)
+  PROPERTY DISABLED $<NOT:$<BOOL:${SUPPORT_SNAN}>>
+)
+
+if(fortran)
+  add_executable(fpeh_fortran fpeh.f90)
+  add_test(NAME FPEH_Fortran COMMAND fpeh_fortran)
+endif()
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   file(GENERATE OUTPUT .gitignore CONTENT "*")
