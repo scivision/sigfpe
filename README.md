@@ -40,3 +40,20 @@ Ideas for code:
 
 * https://developer.apple.com/forums/thread/689159
 * https://stackoverflow.com/questions/69059981/how-to-trap-floating-point-exceptions-on-m1-macs
+
+## Fortran
+
+GNU Fortran 13.0
+
+```
+GCC version 13.1.0
+...
+set quiet NaN                         7FC00000
+Status: divzero, inexact, invalid, overflow, underflow  F F F F F
+set signaling NaN                         7FE00000
+Status: divzero, inexact, invalid, overflow, underflow  F F T F F
+set overflow                         7F7FFFFF
+Status: divzero, inexact, invalid, overflow, underflow  F T T F F
+set div by zero                         7F800000
+Status: divzero, inexact, invalid, overflow, underflow  T T T F F
+```

@@ -2,10 +2,11 @@ program fpeh
 
 use, intrinsic :: ieee_exceptions
 use, intrinsic :: ieee_arithmetic
+use, intrinsic :: iso_fortran_env
 
 implicit none
 
-real :: sNaN, qNaN
+real, volatile :: sNaN, qNaN, r
 integer :: i
 logical :: L
 logical, dimension(5) :: halt, status
@@ -18,8 +19,10 @@ character(9), parameter :: names(5) = [character(9) :: 'divzero ', 'inexact ', '
 ! CALL IEEE_GET_MODES(modes)
 !print *, "IEEE modes: ", modes
 
+print '(a)', compiler_version()
+
 do i = 1,size(halt)
-  print '(a,2L2)', names(i) // ' exception, halting ', ieee_support_flag(flags(i)), ieee_support_halting(flags(i))
+  print '(a,2L2)', names(i) // ' Support exception, halting ', ieee_support_flag(flags(i)), ieee_support_halting(flags(i))
   call ieee_get_halting_mode(flags(i), L)
   print '(a,L2)', names(i) // ' halting mode ', L
 enddo
@@ -28,28 +31,27 @@ enddo
 call print_status_flags(flags, status)
 print '(a)',''
 
-call ieee_set_flag(flags, .true.)
-
+!> Quiet NaN
 qNaN = ieee_value(0., ieee_quiet_nan)
 print '(a,z32)', "set quiet NaN ", qNaN
-
 call print_status_flags(flags, status)
 
-sNan = get_snan()
+!> Signaling NaN
+sNan = ieee_value(0., ieee_signaling_nan) * 0.
 print '(a,z32)', "set signaling NaN ", sNaN
-
 call print_status_flags(flags, status)
 
+!> Overflow
+call random_number(r)
+print '(a,z32)', "set overflow ", huge(0.) + r
+call print_status_flags(flags, status)
+
+!> Div by zero
+print '(a,z32)', "set div by zero ", r / 0.
+call print_status_flags(flags, status)
 
 
 contains
-
-real function get_snan()
-
-get_snan = ieee_value(0., ieee_signaling_nan)
-
-end function get_snan
-
 
 subroutine print_status_flags(flags, status)
 

@@ -21,6 +21,7 @@ endif()
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
  # https://gcc.gnu.org/onlinedocs/gfortran/IEEE-modules.html
  add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:-fno-unsafe-math-optimizations;-frounding-math;-fsignaling-nans>")
+  # add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:-ffpe-trap=invalid$<COMMA>zero$<COMMA>overflow>")
 endif()
 
 # ---- feature checks
