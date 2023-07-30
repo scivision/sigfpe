@@ -43,7 +43,22 @@ Ideas for code:
 
 ## Fortran
 
-GNU Fortran 13.0, macOS Apple Silicon
+GNU Fortran 13.1.0, macOS Apple Silicon
+
+```
+GCC version 13.1.0
+...
+set quiet NaN                         7FC00000
+Status: divzero, inexact, invalid, overflow, underflow  F F F F F
+set signaling NaN                         7FE00000
+Status: divzero, inexact, invalid, overflow, underflow  F F T F F
+set overflow                         7F7FFFFF
+Status: divzero, inexact, invalid, overflow, underflow  F T T F F
+set div by zero                         7F800000
+Status: divzero, inexact, invalid, overflow, underflow  T T T F F
+```
+
+GCC 13.1.0, Windows MSYS2
 
 ```
 GCC version 13.1.0
@@ -73,10 +88,39 @@ set div by zero                         7F800000
 Status: divzero, inexact, invalid, overflow, underflow  T T F F F
 ```
 
+GCC 12.2.1: Linux x86_64
+
+```
+GCC version 12.2.1 20221121 (Red Hat 12.2.1-7)
+set quiet NaN                         FFC00000
+Status: divzero, inexact, invalid, overflow, underflow  F F F F F
+set signaling NaN                         FFC00000
+Status: divzero, inexact, invalid, overflow, underflow  F F F F F
+set overflow                         7F7FFFFF
+Status: divzero, inexact, invalid, overflow, underflow  F T F F F
+set div by zero                         7F800000
+Status: divzero, inexact, invalid, overflow, underflow  T T F F F
+```
+
 Intel oneAPI: Linux x86_64
 
 ```
 Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2023.2.0 Build 20230622
+...
+set quiet NaN                         7FC00000
+Status: divzero, inexact, invalid, overflow, underflow  F F F F F
+set signaling NaN                         7FE00000
+Status: divzero, inexact, invalid, overflow, underflow  F F T F F
+set overflow                         7F7FFFFF
+Status: divzero, inexact, invalid, overflow, underflow  F T T F F
+set div by zero                         7F800000
+Status: divzero, inexact, invalid, overflow, underflow  T T T F F
+```
+
+Nvidia HPC SDK: Linux x86_64
+
+```
+nvfortran 23.5-0
 ...
 set quiet NaN                         7FC00000
 Status: divzero, inexact, invalid, overflow, underflow  F F F F F
