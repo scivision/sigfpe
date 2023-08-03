@@ -103,14 +103,11 @@ void set_snan(double* f)
 #if defined(HAVE_SNAN)
     // https://www.gnu.org/software/libc/manual/html_node/Infinity-and-NaN.html
     *f = SNAN;
-#elif !defined(_MSC_VER)
-    *f = 0.0 / 0.0;
 #else
-    /* From :
-      "NaNs, Uninitialized Variables, and C++"
-      http://codingcastles.blogspot.fr/2008/12/nans-in-c.html
-    */
-     *((long long*)f) = 0x7ff0000000000001LL;
+    // some compilers e.g. MSVC can't build plain 0. / 0.
+    volatile float r;
+    r = 1-1;
+    *f = 0.0 / r;
 #endif
 }
 

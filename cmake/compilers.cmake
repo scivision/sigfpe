@@ -46,10 +46,10 @@ if(NOT HAVE_FEENABLEEXCEPT)
   endif()
 endif()
 
-check_symbol_exists(__SUPPORT_SNAN__ "fenv.h" SUPPORT_SNAN)
-if(SUPPORT_SNAN)
-  check_symbol_exists(SNAN  "fenv.h" HAVE_SNAN)
-endif()
+check_symbol_exists(SNAN  "fenv.h" HAVE_SNAN)
+
+# check_symbol_exists(__SUPPORT_SNAN__ "fenv.h" SUPPORT_SNAN)
+# __SUPPORT_SNAN__ is often undefined but we can still use signaling NaNs
 
 if(NOT MSVC)
   set(CMAKE_REQUIRED_FLAGS "-Werror -Wall")

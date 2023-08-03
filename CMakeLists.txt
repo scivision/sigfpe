@@ -60,7 +60,11 @@ set(names Invalid Overflow DivideByZero QuietNaN SignalNaN)
 # Underflow omitted on purpose, it may trip inexact which is not useful.
 set(index 1 2 4 5 6)
 
-get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+set(languages C CXX)
+if(fortran)
+  # MSVC adds language RC so we do this instead of get_property(GLOBAL PROPERTY ENABLED_LANGUAGES)
+  list(APPEND languages Fortran)
+endif()
 
 foreach(i name IN ZIP_LISTS index names)
   foreach(L IN LISTS languages)
@@ -81,10 +85,6 @@ endforeach()
 
 set_property(TEST ${fire_tests} PROPERTY
   PASS_REGULAR_EXPRESSION "Floating point exception encountered")
-
-set_property(TEST SignalNaN_FPE_C SignalNaN_FPE_CXX
-  PROPERTY DISABLED $<NOT:$<BOOL:${SUPPORT_SNAN}>>
-)
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   file(GENERATE OUTPUT .gitignore CONTENT "*")
