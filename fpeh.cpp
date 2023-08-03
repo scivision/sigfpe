@@ -57,7 +57,9 @@ void enable_floating_point_exceptions()
 {
 
 #ifdef HAVE_FEENABLEEXCEPT /* Linux */
- feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT);
+ feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
+ // | FE_INEXACT
+ // it's typical to omit inexact as it trips on typical operations
 #elif defined(HAVE_FPCR)
  fenv_t env;
  if(std::fegetenv(&env)){
@@ -65,7 +67,7 @@ void enable_floating_point_exceptions()
     exit(EXIT_FAILURE);
  }
 
- env.__fpcr = env.__fpcr | FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT;
+ env.__fpcr = env.__fpcr | FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW;
  std::cout << "set env var __fpcr to " << env.__fpcr  << "\n";
 
  if(std::fesetenv(&env)){
@@ -73,8 +75,8 @@ void enable_floating_point_exceptions()
     exit(EXIT_FAILURE);
  }
 #else
-std::cerr << "FPE signal handling not enabled\n";
-return;
+  std::cerr << "FPE signal handling not enabled\n";
+  return;
 #endif
 
  std::signal(SIGFPE, fpe_signal_handler);

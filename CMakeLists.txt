@@ -26,71 +26,68 @@ $<$<BOOL:${HAVE_PRAGMA_STDC_FENV}>:HAVE_PRAGMA_STDC_FENV>
 add_test(NAME feeenv COMMAND feenv_demo)
 target_link_libraries(feenv_demo PRIVATE ${libm})
 
-add_executable(test_fpe_c fpeh.c)
-target_link_libraries(test_fpe_c PRIVATE ${libm})
-target_compile_definitions(test_fpe_c PRIVATE
+add_executable(test_fpe_C fpeh.c)
+target_link_libraries(test_fpe_C PRIVATE ${libm})
+target_compile_definitions(test_fpe_C PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
 $<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
 $<$<BOOL:${HAVE_SNAN}>:HAVE_SNAN>
 $<$<BOOL:${HAVE_PRAGMA_STDC_FENV}>:HAVE_PRAGMA_STDC_FENV>
 )
 
-add_executable(test_fpe_cpp fpeh.cpp)
-target_link_libraries(test_fpe_cpp PRIVATE ${libm})
-target_compile_definitions(test_fpe_cpp PRIVATE
+add_executable(test_fpe_CXX fpeh.cpp)
+target_link_libraries(test_fpe_CXX PRIVATE ${libm})
+target_compile_definitions(test_fpe_CXX PRIVATE
 $<$<BOOL:${HAVE_FEENABLEEXCEPT}>:HAVE_FEENABLEEXCEPT>
 $<$<BOOL:${HAVE_FPCR}>:HAVE_FPCR>
 $<$<BOOL:${HAVE_PRAGMA_STDC_FENV}>:HAVE_PRAGMA_STDC_FENV>
 )
 
-add_executable(fetestexcept_demo_cpp fetestexcept_demo.cpp)
-target_link_libraries(fetestexcept_demo_cpp PRIVATE ${libm})
-target_compile_definitions(fetestexcept_demo_cpp PRIVATE
+if(fortran)
+  add_executable(test_fpe_Fortran fpeh.f90)
+endif()
+
+add_executable(fetestexcept_demo_CXX fetestexcept_demo.cpp)
+target_link_libraries(fetestexcept_demo_CXX PRIVATE ${libm})
+target_compile_definitions(fetestexcept_demo_CXX PRIVATE
 $<$<BOOL:${HAVE_PRAGMA_STDC_FENV}>:HAVE_PRAGMA_STDC_FENV>
 )
-add_test(NAME fetestexcept_cpp COMMAND fetestexcept_demo_cpp)
-set_property(TEST fetestexcept_cpp PROPERTY LABELS "Cpp")
+add_test(NAME fetestexcept_CXX COMMAND fetestexcept_demo_CXX)
+set_property(TEST fetestexcept_CXX PROPERTY LABELS "CXX")
 
-foreach(fpe IN ITEMS 1 0)
-  foreach(L IN ITEMS c cpp)
+set(names Invalid Overflow DivideByZero QuietNaN SignalNaN)
+# Underflow omitted on purpose, it may trip inexact which is not useful.
+set(index 1 2 4 5 6)
 
-    add_test(NAME Invalid_FPE${fpe}_${L}
-      COMMAND test_fpe_${L} 1 ${fpe})
-    add_test(NAME Overflow_FPE${fpe}_${L}
-      COMMAND test_fpe_${L} 2 ${fpe})
-    add_test(NAME DivideByZero_FPE${fpe}_${L}
-      COMMAND test_fpe_${L} 4 ${fpe})
-    add_test(NAME QuietNaN_FPE${fpe}_${L}
-      COMMAND test_fpe_${L} 5 ${fpe})
-    add_test(NAME SignalNaN_FPE${fpe}_${L}
-      COMMAND test_fpe_${L} 6 ${fpe})
+get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
-    # This test may trip FP_INEXACT on some platforms e.g. macOS intel CPU
-    # add_test(NAME Underflow_FPE${fpe}_${L} COMMAND test_fpe 3 ${fpe})
+foreach(i name IN ZIP_LISTS index names)
+  foreach(fpe IN ITEMS 1 0)
+    foreach(L IN LISTS languages)
+
+      add_test(NAME ${name}_FPE${fpe}_${L} COMMAND test_fpe_${L} ${i} ${fpe})
+      set_property(TEST ${name}_FPE${fpe}_${L} PROPERTY LABELS ${L})
+
+    endforeach()
   endforeach()
 endforeach()
 
 # Overflow didn't fire on NVHPC 23.5
 set(fire_tests
-Invalid_FPE1_c Invalid_FPE1_cpp
-Overflow_FPE1_c Overflow_FPE1_cpp
-DivideByZero_FPE1_c DivideByZero_FPE1_cpp
-SignalNaN_FPE1_c SignalNaN_FPE1_cpp
+Invalid_FPE1_C Invalid_FPE1_CXX
+Overflow_FPE1_C Overflow_FPE1_CXX
+DivideByZero_FPE1_C DivideByZero_FPE1_CXX
+SignalNaN_FPE1_C SignalNaN_FPE1_CXX
 )
 
 set_property(TEST ${fire_tests} PROPERTY
   PASS_REGULAR_EXPRESSION "Floating point exception encountered")
 
 set_property(TEST
-SignalNaN_FPE0_c SignalNaN_FPE1_c
-SignalNaN_FPE0_cpp SignalNaN_FPE1_cpp
+SignalNaN_FPE0_C SignalNaN_FPE1_C
+SignalNaN_FPE0_CXX SignalNaN_FPE1_CXX
   PROPERTY DISABLED $<NOT:$<BOOL:${SUPPORT_SNAN}>>
 )
-
-if(fortran)
-  add_executable(fpeh_fortran fpeh.f90)
-  add_test(NAME FPEH_Fortran COMMAND fpeh_fortran)
-endif()
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   file(GENERATE OUTPUT .gitignore CONTENT "*")
