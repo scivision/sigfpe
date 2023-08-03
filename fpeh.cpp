@@ -188,23 +188,20 @@ void check_for_fpe(void)
 
 int main(int argc, char** argv)
 {
-    int fpe_id = 1;
-    int use_eh = 0;
 
-    if (argc > 1)
-        fpe_id = std::atoi(argv[1]);
-    if (argc > 2)
-        use_eh = std::atoi(argv[2]);
-
-    if (use_eh){
-        std::cout << "Enabling exception handling\n";
-        enable_floating_point_exceptions();
+    if (argc < 1){
+        std::cerr << "specify fpe integer mode (1-6)\n";
+        return EXIT_FAILURE;
     }
+
+    int fpe_id = atoi(argv[1]);
+
+    enable_floating_point_exceptions();
 
     show_fe_exceptions();
     double y = create_exception(fpe_id);
 
-    if (use_eh && std::fetestexcept(FE_ALL_EXCEPT)){
+    if (std::fetestexcept(FE_ALL_EXCEPT)){
         std::cerr << "Should not get here, using alternate check function\n";
         check_for_fpe();
         return EXIT_FAILURE;

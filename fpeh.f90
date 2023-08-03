@@ -6,9 +6,7 @@ use, intrinsic :: iso_fortran_env
 
 implicit none
 
-real, volatile :: r
 integer :: i, istat
-logical :: status, support_exception, support_halting, halting_mode
 
 type(ieee_flag_type) :: flag
 character :: buf
@@ -50,12 +48,27 @@ case default
   error stop help
 end select
 
+if (check_exception(flag, name)) error stop name // " Floating point exception encountered"
+
+print '(a)', name // " no FPE encountered"
+
+contains
+
+
+logical function check_exception(flag, name)
+
+type(ieee_flag_type), intent(in) :: flag
+character(*), intent(in) :: name
+
+logical :: support_exception, support_halting, halting_mode
+real, volatile :: r
+
 support_exception = ieee_support_flag(flag)
 support_halting = ieee_support_halting(flag)
 call ieee_get_halting_mode(flag, halting_mode)
-call ieee_get_flag(flag, status)
+call ieee_get_flag(flag, check_exception)
 print '(a, 4L2)', name // ' Support_exception, support_halting, halting_mode, status_before: ',&
-   support_exception, support_halting, halting_mode, status
+   support_exception, support_halting, halting_mode, check_exception
 
 select case (i)
 case (1)
@@ -73,11 +86,12 @@ case (5)
   r = ieee_value(0., ieee_quiet_nan)
 case (6)
   r = ieee_value(0., ieee_signaling_nan) * 0.
-case default
-  error stop help
 end select
 
-call ieee_get_flag(flag, status)
-print '(a13,a,z8,L2)', name, " value, status after: ", r, status
+call ieee_get_flag(flag, check_exception)
+print '(a13,a,z8,L2)', name, " value, status after: ", r, check_exception
+
+
+end function check_exception
 
 end program fpeh
