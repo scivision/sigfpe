@@ -42,7 +42,7 @@ if(NOT HAVE_FEENABLEEXCEPT)
   check_source_compiles(C "#include <fenv.h>
   int main(void) { fenv_t env; env.__fpcr; return 0; }" HAVE_FPCR)
   if(NOT HAVE_FPCR)
-    message(WARNING "no FP exception handling available on this platform")
+    message(STATUS "no FP exception handling available on this platform")
   endif()
 endif()
 
