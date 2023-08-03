@@ -8,6 +8,8 @@ implicit none
 
 integer :: i, istat
 
+type(ieee_flag_type) :: flags(5) = [ieee_invalid, ieee_overflow, ieee_underflow, ieee_divide_by_zero, ieee_inexact]
+logical :: flags_status(5)
 type(ieee_flag_type) :: flag
 character :: buf
 character(13) :: name
@@ -50,7 +52,9 @@ end select
 
 if (check_exception(flag, name)) error stop name // " Floating point exception encountered"
 
-print '(a)', name // " no FPE encountered"
+
+call ieee_get_flag(flags, flags_status)
+print '(a, 5L2)', name // " no FPE encountered: ", flags_status
 
 contains
 
@@ -75,8 +79,8 @@ case (1)
   r = 2-3
   r = sqrt(r)
 case (2)
-  call random_number(r)
-  r = huge(0.) + r
+  r = 3000.
+  r = exp(r)
 case (3)
   r = tiny(0.) * 0.5
 case (4)
