@@ -6,14 +6,12 @@ use, intrinsic :: iso_fortran_env
 
 implicit none
 
-integer :: i, istat
+integer :: i
+logical :: dummy
 
-type(ieee_flag_type) :: flags(5) = [ieee_invalid, ieee_overflow, ieee_underflow, ieee_divide_by_zero, ieee_inexact]
-logical :: flags_status(5)
-type(ieee_flag_type) :: flag
 character :: buf
 character(13) :: name
-character(*), parameter :: help = "mode: 1: invalid  2: overflow 3: underflow 4: divzero 5: quiet NaN 6: signaling NaN"
+type(ieee_flag_type) :: flag
 
 !> IEEE_MODE_TYPE is Fortran 2018; only oneAPI supports at this time.
 ! TYPE(IEEE_MODE_TYPE) :: modes
@@ -21,11 +19,29 @@ character(*), parameter :: help = "mode: 1: invalid  2: overflow 3: underflow 4:
 !print *, "IEEE modes: ", modes
 
 print '(a)', compiler_version()
+print '(a)', "Boolean values: Support_exception, support_halt, halt_mode, status_before, status_after, hex_value"
 
-call get_command_argument(1, buf, status=istat)
-if (istat /= 0) error stop help
 
-read(buf, '(i1)') i
+call get_command_argument(1, buf, status=i)
+if (i == 0) then
+  read(buf, '(i1)') i
+  call enum_flag(i, name, flag)
+  if(test_exception(name, flag)) error stop
+else
+  do i = 1, 6
+    call enum_flag(i, name, flag)
+    dummy = test_exception(name, flag)
+    call ieee_set_flag(flag, .false.)
+  end do
+endif
+
+contains
+
+elemental subroutine enum_flag(i, name, flag)
+
+integer, intent(in) :: i
+character(*), intent(out) :: name
+type(ieee_flag_type), intent(out) :: flag
 
 select case (i)
 case (1)
@@ -47,16 +63,31 @@ case (6)
   name = "signaling NaN"
   flag = ieee_invalid
 case default
-  error stop help
+  error stop "mode: 1: invalid  2: overflow 3: underflow 4: divzero 5: quiet NaN 6: signaling NaN"
 end select
 
-if (check_exception(flag, name)) error stop name // " Floating point exception encountered"
+end subroutine enum_flag
 
+
+logical function test_exception(name, flag)
+
+character(*), intent(in) :: name
+type(ieee_flag_type), intent(in) :: flag
+
+type(ieee_flag_type) :: flags(5) = [ieee_invalid, ieee_overflow, ieee_underflow, ieee_divide_by_zero, ieee_inexact]
+logical :: flags_status(5)
+
+test_exception = check_exception(flag, name)
+
+if (test_exception) then
+  write(error_unit, '(a)') name // " Floating point exception encountered"
+  return
+endif
 
 call ieee_get_flag(flags, flags_status)
 print '(a, 5L2)', name // " no FPE encountered: ", flags_status
 
-contains
+end function test_exception
 
 
 logical function check_exception(flag, name)
@@ -64,15 +95,13 @@ logical function check_exception(flag, name)
 type(ieee_flag_type), intent(in) :: flag
 character(*), intent(in) :: name
 
-logical :: support_exception, support_halting, halting_mode
+logical :: support_exception, support_halting, halting_mode, before
 real, volatile :: r
 
 support_exception = ieee_support_flag(flag)
 support_halting = ieee_support_halting(flag)
 call ieee_get_halting_mode(flag, halting_mode)
-call ieee_get_flag(flag, check_exception)
-print '(a, 4L2)', name // ' Support_exception, support_halting, halting_mode, status_before: ',&
-   support_exception, support_halting, halting_mode, check_exception
+call ieee_get_flag(flag, before)
 
 select case (i)
 case (1)
@@ -93,7 +122,7 @@ case (6)
 end select
 
 call ieee_get_flag(flag, check_exception)
-print '(a13,a,z8,L2)', name, " value, status after: ", r, check_exception
+print '(a14, 5L2, 2x, z8)', name, support_exception, support_halting, halting_mode, before, check_exception, r
 
 
 end function check_exception
