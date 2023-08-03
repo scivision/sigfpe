@@ -23,7 +23,6 @@
 
 void fpe_signal_handler(int sig) {
     std::cerr << "Floating point exception encountered\n";
-    /* would like non-zero exit code, but that interferes with CTest */
     switch (sig)
     {
         case FE_INVALID:
@@ -165,7 +164,7 @@ void show_fe_exceptions(void)
     // from https://en.cppreference.com/w/c/numeric/fenv/feenv
     std::cout << "current exceptions raised: ";
     if(std::fetestexcept(FE_DIVBYZERO))     std::cout << " FE_DIVBYZERO";
-    if(std::fetestexcept(FE_INEXACT))       std::cout << " FE_INEXACT";
+    // if(std::fetestexcept(FE_INEXACT))       std::cout << " FE_INEXACT";
     if(std::fetestexcept(FE_INVALID))       std::cout << " FE_INVALID";
     if(std::fetestexcept(FE_OVERFLOW))      std::cout << " FE_OVERFLOW";
     if(std::fetestexcept(FE_UNDERFLOW))     std::cout << " FE_UNDERFLOW";

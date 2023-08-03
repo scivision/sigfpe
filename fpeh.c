@@ -29,7 +29,6 @@ https://en.cppreference.com/w/c/experimental/fpext1
 
 void fpe_signal_handler(int sig) {
     fprintf(stderr, "Floating point exception encountered\n");
-    /* would like non-zero exit code, but that interferes with CTest */
     switch (sig)
     {
         case FE_INVALID:
@@ -63,7 +62,7 @@ void enable_floating_point_exceptions()
 {
 
 #ifdef HAVE_FEENABLEEXCEPT /* Linux */
- feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT);
+ feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
 #elif defined(HAVE_FPCR)
 // this code was intended for macOS Apple Silicon, but signal() doesn't fire
  fenv_t env;
@@ -72,7 +71,7 @@ void enable_floating_point_exceptions()
     exit(EXIT_FAILURE);
  }
 
- env.__fpcr = env.__fpcr | FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT;
+ env.__fpcr = env.__fpcr | FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW;
  printf("set env var __fpcr to %llx\n", env.__fpcr);
 
  if(fesetenv(&env)){
@@ -80,8 +79,8 @@ void enable_floating_point_exceptions()
     exit(EXIT_FAILURE);
  }
 #else
-fprintf(stderr, "FPE signal handling not enabled\n");
-return;
+  fprintf(stderr, "FPE signal handling not enabled\n");
+  return;
 #endif
 
  signal(SIGFPE, fpe_signal_handler);
@@ -196,7 +195,7 @@ void check_for_fpe(void)
     // Instead of signal(), the user code would call this function as desired to check
     // if an FPE occurred.
     if(fetestexcept(FE_DIVBYZERO))     fpe_signal_handler(FE_DIVBYZERO);
-    if(fetestexcept(FE_INEXACT))       fpe_signal_handler(FE_INEXACT);
+    // if(fetestexcept(FE_INEXACT))       fpe_signal_handler(FE_INEXACT);
     if(fetestexcept(FE_INVALID))       fpe_signal_handler(FE_INVALID);
     if(fetestexcept(FE_OVERFLOW))      fpe_signal_handler(FE_OVERFLOW);
     if(fetestexcept(FE_UNDERFLOW))     fpe_signal_handler(FE_UNDERFLOW);
