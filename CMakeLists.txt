@@ -5,7 +5,7 @@ LANGUAGES C CXX)
 
 enable_testing()
 
-option(fortran "build Fortran examples")
+option(fortran "build Fortran examples" on)
 
 if(fortran)
   enable_language(Fortran)
